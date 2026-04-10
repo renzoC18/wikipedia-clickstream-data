@@ -18,52 +18,71 @@ st.markdown("""
     html, body, [class*="css"] { font-family: 'IBM Plex Sans', sans-serif; }
     h1, h2, h3 { font-family: 'Syne', sans-serif; }
     .block-container { padding-top: 1.5rem; padding-bottom: 2rem; max-width: 100%; }
+
+    /* Force all Streamlit accent elements to blue */
+    :root {
+        --primary-color: #3b82f6 !important;
+    }
+    .stSlider [data-baseweb="slider"] [role="slider"] {
+        background-color: #3b82f6 !important;
+        border-color: #3b82f6 !important;
+    }
+    .stSlider [data-baseweb="slider"] [data-testid="stThumbValue"] {
+        color: #3b82f6 !important;
+    }
+    div[data-baseweb="slider"] > div > div > div {
+        background: #3b82f6 !important;
+    }
+    .stMultiSelect [data-baseweb="tag"] {
+        background-color: #1d4ed8 !important;
+    }
+    .stSelectbox [aria-selected="true"] {
+        color: #3b82f6 !important;
+    }
+    a { color: #60a5fa !important; }
+
+    /* KPI cards */
+    .kpi-row {
+        display: flex;
+        gap: 1rem;
+        align-items: stretch;
+        margin-bottom: 1rem;
+    }
     .metric-card {
-        background: #1e293b;
-        border: 1px solid #334155;
+        background: #1a2744;
+        border: 1px solid #2a3f6f;
         border-radius: 12px;
         padding: 1rem 0.75rem;
         text-align: center;
-        height: 90px;
+        flex: 1;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        overflow: hidden;
+        min-height: 80px;
     }
     .metric-value {
         font-family: 'Syne', sans-serif;
         font-size: 1.5rem;
         font-weight: 800;
-        color: #f97316;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 100%;
-    }
-    .metric-value-sm {
-        font-family: 'Syne', sans-serif;
-        font-size: 1.05rem;
-        font-weight: 800;
-        color: #f97316;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 100%;
-        line-height: 1.3;
+        color: #60a5fa;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+        line-height: 1.25;
     }
     .metric-label {
         font-size: 0.7rem;
         color: #94a3b8;
         text-transform: uppercase;
         letter-spacing: 0.07em;
-        margin-top: 0.25rem;
+        margin-top: 0.35rem;
     }
     .section-title {
         font-family: 'Syne', sans-serif;
         font-size: 1rem;
         font-weight: 700;
         color: #f1f5f9;
-        border-left: 3px solid #f97316;
+        border-left: 3px solid #3b82f6;
         padding-left: 0.75rem;
         margin-bottom: 0.4rem;
         margin-top: 0.2rem;
@@ -75,29 +94,27 @@ st.markdown("""
         padding: 1rem 1.25rem;
         margin-bottom: 1rem;
     }
-    .nav-link {
-        display: block;
-        color: #94a3b8;
-        font-size: 0.82rem;
-        padding: 0.3rem 0;
-        text-decoration: none;
-        border-bottom: 1px solid #1e293b;
+    .info-box {
+        background: #0f1e35;
+        border: 1px solid #2a3f6f;
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        margin-top: 1rem;
     }
-    .nav-link:hover { color: #f97316; }
 </style>
 """, unsafe_allow_html=True)
 
-# ── Colour-blind safe palette (Wong 2011) ─────────────────────────────────────
-CB_ORANGE  = "#E69F00"
-CB_BLUE    = "#56B4E9"
-CB_GREEN   = "#009E73"
-CB_YELLOW  = "#F0E442"
-CB_DBLUE   = "#0072B2"
-CB_RED     = "#D55E00"
-CB_PINK    = "#CC79A7"
-CB_BLACK   = "#000000"
+# ── Colour palette — Wikipedia blue, colour-blind safe (Wong 2011) ────────────
+CB_BLUE   = "#3b82f6"
+CB_LBLUE  = "#60a5fa"
+CB_DBLUE  = "#0072B2"
+CB_TEAL   = "#009E73"
+CB_YELLOW = "#F0E442"
+CB_RED    = "#D55E00"
+CB_PINK   = "#CC79A7"
+CB_ORANGE = "#E69F00"   # kept only for Wong palette completeness, not used as primary
 
-CHART_COLORS = [CB_ORANGE, CB_BLUE, CB_GREEN, CB_YELLOW, CB_DBLUE, CB_RED, CB_PINK]
+CHART_COLORS = [CB_BLUE, CB_DBLUE, CB_TEAL, CB_YELLOW, CB_LBLUE, CB_RED, CB_PINK]
 
 PLOT_BG  = "#0f172a"
 PAPER_BG = "#0f172a"
@@ -114,7 +131,6 @@ MONTH_LABELS = {
 }
 
 def fmt_m(n):
-    """Format a number as XM or X.XM."""
     return f"{n/1e6:.1f}M"
 
 def base_layout(height=380):
@@ -148,14 +164,13 @@ hyphen_minus   = pd.read_csv("hyphen_minus.csv")
 monthly_totals["month_label"] = monthly_totals["month"].map(MONTH_LABELS)
 hyphen_minus["month_label"]   = hyphen_minus["month"].map(MONTH_LABELS)
 
-# All articles that ever appeared in the top 50 across any month
 all_article_options = sorted(all_articles["curr"].unique().tolist())
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("""
     <div style='font-family:Syne; font-size:1.15rem; font-weight:800;
-                color:#f97316; margin-bottom:0.25rem;'>
+                color:#3b82f6; margin-bottom:0.25rem;'>
         📖 Wikipedia Clickstream
     </div>
     <div style='color:#64748b; font-size:0.78rem; margin-bottom:1rem;'>
@@ -163,10 +178,9 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    # ── Navigation index ──────────────────────────────────────────────────────
     with st.expander("📑 Jump to section", expanded=False):
         st.markdown("""
-        - [Overview KPIs](#overview)
+        - [Overview KPIs](#kpi-overview)
         - [Monthly Trend](#monthly-trend)
         - [Top Articles](#top-articles-by-clicks)
         - [Traffic Sources](#traffic-source-breakdown)
@@ -178,7 +192,6 @@ with st.sidebar:
 
     st.markdown("---")
 
-    # ── Month selector ────────────────────────────────────────────────────────
     st.markdown("**🗓 Time period**")
     month_options = ["All months"] + list(MONTH_LABELS.keys())
     month_display = ["All months combined"] + list(MONTH_LABELS.values())
@@ -193,28 +206,32 @@ with st.sidebar:
 
     st.markdown("---")
 
-    # ── Chart controls ────────────────────────────────────────────────────────
     st.markdown("**📊 Chart controls**")
     top_n = st.slider("Articles to show", min_value=5, max_value=50, value=20, step=5)
 
     st.markdown("---")
 
-    # ── Filters ───────────────────────────────────────────────────────────────
     st.markdown("**🔍 Filters**")
-
-    traffic_type_options = ["All", "Internal links only", "Search traffic only", "External only"]
-    traffic_filter = st.selectbox("Traffic type", traffic_type_options)
+    traffic_type_options = ["All", "Internal links only", "Search traffic only"]
+    traffic_filter = st.selectbox(
+        "Traffic type",
+        traffic_type_options,
+        help=(
+            "All: show everything.\n"
+            "Internal links only: articles reached via Wikipedia internal links.\n"
+            "Search traffic only: articles reached via search engines."
+        ),
+    )
 
     min_clicks_m = st.slider(
         "Min. clicks (M) for article charts",
         min_value=0.0, max_value=50.0, value=0.0, step=0.5,
-        help="Hide articles below this monthly click threshold"
+        help="Hide articles below this click threshold",
     )
     min_clicks = min_clicks_m * 1_000_000
 
     st.markdown("---")
 
-    # ── Article search ────────────────────────────────────────────────────────
     st.markdown("**🔎 Article search**")
     article_search = st.text_input(
         "Filter articles by name",
@@ -222,18 +239,9 @@ with st.sidebar:
         label_visibility="collapsed",
     )
 
-# ── Filter logic ──────────────────────────────────────────────────────────────
-def apply_traffic_filter(df, col="type"):
-    if traffic_filter == "Internal links only":
-        return df[df[col] == "link"]
-    elif traffic_filter == "Search traffic only":
-        return df[df["prev"] == "other-search"] if "prev" in df.columns else df
-    elif traffic_filter == "External only":
-        return df[df[col] == "external"]
-    return df
-
+# ── Base data selection (by month) ────────────────────────────────────────────
 if is_all:
-    articles = (
+    articles_base = (
         all_articles.groupby("curr")["total_clicks"]
         .sum().reset_index()
         .sort_values("total_clicks", ascending=False)
@@ -242,45 +250,74 @@ if is_all:
         all_traffic.groupby("type")["total_clicks"]
         .sum().reset_index()
     )
-    searched = (
+    searched_base = (
         all_searched.groupby("curr")["total_clicks"]
         .sum().reset_index()
         .sort_values("total_clicks", ascending=False)
     )
-    # Fix: ensure pairs are fully aggregated — sum across months
-    pairs = (
+    pairs_base = (
         all_pairs.groupby(["prev", "curr"])["total_clicks"]
         .sum().reset_index()
         .sort_values("total_clicks", ascending=False)
     )
 else:
-    articles = all_articles[all_articles["month"] == selected_month].sort_values("total_clicks", ascending=False)
-    traffic  = all_traffic[all_traffic["month"] == selected_month]
-    searched = all_searched[all_searched["month"] == selected_month].sort_values("total_clicks", ascending=False)
-    # Fix: sum within month to collapse any residual duplicates
-    pairs = (
+    articles_base = (
+        all_articles[all_articles["month"] == selected_month]
+        .sort_values("total_clicks", ascending=False)
+        .reset_index(drop=True)
+    )
+    traffic = all_traffic[all_traffic["month"] == selected_month]
+    searched_base = (
+        all_searched[all_searched["month"] == selected_month]
+        .sort_values("total_clicks", ascending=False)
+        .reset_index(drop=True)
+    )
+    pairs_base = (
         all_pairs[all_pairs["month"] == selected_month]
         .groupby(["prev", "curr"])["total_clicks"]
         .sum().reset_index()
         .sort_values("total_clicks", ascending=False)
     )
 
-# Apply min clicks filter
-articles = articles[articles["total_clicks"] >= min_clicks]
-searched = searched[searched["total_clicks"] >= min_clicks]
+# ── Apply traffic type filter ─────────────────────────────────────────────────
+# top articles: filtered by which curr values appear in the relevant source
+if traffic_filter == "Internal links only":
+    valid_curr = pairs_base["curr"].unique()
+    articles   = articles_base[articles_base["curr"].isin(valid_curr)].copy()
+    searched   = pd.DataFrame(columns=searched_base.columns)   # not relevant
+    pairs      = pairs_base.copy()
+elif traffic_filter == "Search traffic only":
+    valid_curr = searched_base["curr"].unique()
+    articles   = articles_base[articles_base["curr"].isin(valid_curr)].copy()
+    searched   = searched_base.copy()
+    pairs      = pd.DataFrame(columns=pairs_base.columns)      # not relevant
+else:
+    articles = articles_base.copy()
+    searched = searched_base.copy()
+    pairs    = pairs_base.copy()
 
-# Apply article name search
+# ── Apply min clicks filter ───────────────────────────────────────────────────
+articles = articles[articles["total_clicks"] >= min_clicks]
+searched = searched[searched["total_clicks"] >= min_clicks] if not searched.empty else searched
+
+# ── Apply article name search ─────────────────────────────────────────────────
 if article_search.strip():
     q = article_search.strip().lower().replace(" ", "_")
     articles = articles[articles["curr"].str.lower().str.contains(q, na=False)]
-    searched = searched[searched["curr"].str.lower().str.contains(q, na=False)]
+    if not searched.empty:
+        searched = searched[searched["curr"].str.lower().str.contains(q, na=False)]
+    if not pairs.empty:
+        pairs = pairs[
+            pairs["prev"].str.lower().str.contains(q, na=False) |
+            pairs["curr"].str.lower().str.contains(q, na=False)
+        ]
 
 # ── Header ────────────────────────────────────────────────────────────────────
 period_label = "Sep 2025 – Feb 2026" if is_all else MONTH_LABELS[selected_month]
 st.markdown(f"""
-<h1 id="overview" style='font-family:Syne; font-size:1.9rem; margin-bottom:0; color:#f1f5f9;'>
+<h1 style='font-family:Syne; font-size:1.9rem; margin-bottom:0; color:#f1f5f9;'>
     Wikipedia Clickstream &nbsp;
-    <span style='color:#f97316;'>{period_label}</span>
+    <span style='color:#3b82f6;'>{period_label}</span>
 </h1>
 <p style='color:#64748b; margin-top:0.2rem; font-size:0.82rem;'>
     English Wikipedia reader navigation · Main_Page and Hyphen-Minus excluded from main analysis
@@ -290,40 +327,39 @@ st.markdown(f"""
 st.markdown("---")
 
 # ── KPI cards ─────────────────────────────────────────────────────────────────
-total_clicks    = articles["total_clicks"].sum()
-top_page        = articles.iloc[0]["curr"] if len(articles) > 0 else "N/A"
-top_page_clicks = articles.iloc[0]["total_clicks"] if len(articles) > 0 else 0
-top_page_label  = top_page.replace("_", " ")
+st.markdown('<div id="kpi-overview"></div>', unsafe_allow_html=True)
 
-# Shorten for display — if over 18 chars use abbreviation
-if len(top_page_label) > 18:
-    display_name = top_page_label[:16] + "…"
-    name_class   = "metric-value-sm"
-else:
-    display_name = top_page_label
-    name_class   = "metric-value"
+total_clicks    = articles["total_clicks"].sum() if not articles.empty else 0
+top_page        = articles.iloc[0]["curr"] if not articles.empty else "N/A"
+top_page_clicks = articles.iloc[0]["total_clicks"] if not articles.empty else 0
+top_page_label  = top_page.replace("_", " ")
 
 try:
     link_pct = traffic[traffic["type"] == "link"]["total_clicks"].values[0]
     link_pct = link_pct / traffic["total_clicks"].sum() * 100
-except:
+except Exception:
     link_pct = 0.0
 
-c1, c2, c3, c4 = st.columns(4)
-cards = [
-    ("metric-value", f"{total_clicks/1e6:.1f}M", "Total clicks (excl. outliers)"),
-    (name_class,     display_name,                "Most visited article"),
-    ("metric-value", fmt_m(top_page_clicks),      "Clicks on top article"),
-    ("metric-value", f"{link_pct:.1f}%",          "Traffic via internal links"),
-]
-for col, (cls, val, label) in zip([c1, c2, c3, c4], cards):
-    with col:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="{cls}" title="{val}">{val}</div>
-            <div class="metric-label">{label}</div>
-        </div>
-        """, unsafe_allow_html=True)
+st.markdown(f"""
+<div class="kpi-row">
+    <div class="metric-card">
+        <div class="metric-value">{total_clicks/1e6:.1f}M</div>
+        <div class="metric-label">Total clicks (excl. outliers)</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-value">{top_page_label}</div>
+        <div class="metric-label">Most visited article</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-value">{fmt_m(top_page_clicks)}</div>
+        <div class="metric-label">Clicks on top article</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-value">{link_pct:.1f}%</div>
+        <div class="metric-label">Traffic via internal links</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -335,10 +371,10 @@ if is_all:
         x=monthly_totals["month_label"],
         y=monthly_totals["total_clicks"],
         mode="lines+markers",
-        line=dict(color=CB_ORANGE, width=3),
-        marker=dict(size=8, color=CB_ORANGE),
+        line=dict(color=CB_BLUE, width=3),
+        marker=dict(size=8, color=CB_BLUE),
         fill="tozeroy",
-        fillcolor="rgba(230,159,0,0.12)",
+        fillcolor="rgba(59,130,246,0.12)",
         hovertemplate="<b>%{x}</b><br>%{y:,} clicks<extra></extra>",
     ))
     fig_trend.update_layout(**base_layout(height=240), margin=dict(t=10, b=40, l=10, r=10))
@@ -349,22 +385,25 @@ col_a, col_b = st.columns([3, 2], gap="medium")
 
 with col_a:
     st.markdown('<div class="section-title" id="top-articles-by-clicks">Top Articles by Clicks</div>', unsafe_allow_html=True)
-    df_art = articles.head(top_n).copy()
-    df_art["label"] = df_art["curr"].str.replace("_", " ")
-    fig1 = go.Figure(go.Bar(
-        x=df_art["label"],
-        y=df_art["total_clicks"],
-        marker=dict(
-            color=df_art["total_clicks"],
-            colorscale=[[0, "#1a3a5c"], [1, CB_ORANGE]],
-            showscale=False,
-        ),
-        hovertemplate="<b>%{x}</b><br>%{y:,} clicks<extra></extra>",
-    ))
-    layout1 = base_layout(380)
-    layout1["xaxis"]["tickangle"] = -40
-    fig1.update_layout(**layout1, margin=dict(t=20, b=60, l=10, r=10))
-    st.plotly_chart(fig1, use_container_width=True)
+    if articles.empty:
+        st.info("No articles match the current filter selection.")
+    else:
+        df_art = articles.head(top_n).copy()
+        df_art["label"] = df_art["curr"].str.replace("_", " ")
+        fig1 = go.Figure(go.Bar(
+            x=df_art["label"],
+            y=df_art["total_clicks"],
+            marker=dict(
+                color=df_art["total_clicks"],
+                colorscale=[[0, "#1a3a5c"], [1, CB_BLUE]],
+                showscale=False,
+            ),
+            hovertemplate="<b>%{x}</b><br>%{y:,} clicks<extra></extra>",
+        ))
+        layout1 = base_layout(380)
+        layout1["xaxis"]["tickangle"] = -40
+        fig1.update_layout(**layout1, margin=dict(t=20, b=80, l=10, r=10))
+        st.plotly_chart(fig1, use_container_width=True)
 
 with col_b:
     st.markdown('<div class="section-title" id="traffic-source-breakdown">Traffic Source Breakdown</div>', unsafe_allow_html=True)
@@ -398,43 +437,56 @@ col_c, col_d = st.columns(2, gap="medium")
 
 with col_c:
     st.markdown('<div class="section-title" id="top-search-driven-articles">Top Search-Driven Articles</div>', unsafe_allow_html=True)
-    df_s = searched.head(top_n).copy()
-    df_s["label"] = df_s["curr"].str.replace("_", " ")
-    fig3 = go.Figure(go.Bar(
-        x=df_s["label"],
-        y=df_s["total_clicks"],
-        marker_color=CB_BLUE,
-        hovertemplate="<b>%{x}</b><br>%{y:,} clicks<extra></extra>",
-    ))
-    layout3 = base_layout(380)
-    layout3["xaxis"]["tickangle"] = -40
-    fig3.update_layout(**layout3, margin=dict(t=20, b=60, l=10, r=10))
-    st.plotly_chart(fig3, use_container_width=True)
+    if searched.empty:
+        st.info("Not applicable for 'Internal links only' filter.")
+    else:
+        df_s = searched.head(top_n).copy()
+        df_s["label"] = df_s["curr"].str.replace("_", " ")
+        fig3 = go.Figure(go.Bar(
+            x=df_s["label"],
+            y=df_s["total_clicks"],
+            marker=dict(
+                color=df_s["total_clicks"],
+                colorscale=[[0, "#1a3a5c"], [1, CB_DBLUE]],
+                showscale=False,
+            ),
+            hovertemplate="<b>%{x}</b><br>%{y:,} clicks<extra></extra>",
+        ))
+        layout3 = base_layout(380)
+        layout3["xaxis"]["tickangle"] = -40
+        fig3.update_layout(**layout3, margin=dict(t=20, b=80, l=10, r=10))
+        st.plotly_chart(fig3, use_container_width=True)
 
 with col_d:
     st.markdown('<div class="section-title" id="top-internal-link-sources">Top Internal Link Sources</div>', unsafe_allow_html=True)
-    df_p = pairs.head(top_n).copy()
-    df_p["prev_label"] = df_p["prev"].str.replace("_", " ")
-    df_p["curr_label"] = df_p["curr"].str.replace("_", " ")
-
-    fig4 = go.Figure(go.Bar(
-        y=df_p["prev_label"],
-        x=df_p["total_clicks"],
-        orientation="h",
-        marker_color=CB_GREEN,
-        customdata=df_p[["curr_label", "total_clicks"]],
-        hovertemplate=(
-            "<b>From:</b> %{y}<br>"
-            "<b>To:</b> %{customdata[0]}<br>"
-            "<b>Clicks:</b> %{x:,}<extra></extra>"
-        ),
-    ))
-    layout4 = base_layout(380)
-    layout4["yaxis"]["autorange"] = "reversed"
-    layout4["margin"] = dict(t=20, b=20, l=10, r=10)
-    fig4.update_layout(**layout4)
-    st.plotly_chart(fig4, use_container_width=True)
-    st.caption("Each bar = total clicks from one article (prev) to its most-linked destination (curr). Hover to see the destination.")
+    if pairs.empty:
+        st.info("Not applicable for 'Search traffic only' filter.")
+    else:
+        df_p = pairs.head(top_n).copy()
+        df_p["prev_label"] = df_p["prev"].str.replace("_", " ")
+        df_p["curr_label"] = df_p["curr"].str.replace("_", " ")
+        fig4 = go.Figure(go.Bar(
+            y=df_p["prev_label"],
+            x=df_p["total_clicks"],
+            orientation="h",
+            marker=dict(
+                color=df_p["total_clicks"],
+                colorscale=[[0, "#0a2a4a"], [1, CB_TEAL]],
+                showscale=False,
+            ),
+            customdata=df_p[["curr_label", "total_clicks"]],
+            hovertemplate=(
+                "<b>From:</b> %{y}<br>"
+                "<b>To:</b> %{customdata[0]}<br>"
+                "<b>Clicks:</b> %{x:,}<extra></extra>"
+            ),
+        ))
+        layout4 = base_layout(380)
+        layout4["yaxis"]["autorange"] = "reversed"
+        layout4["margin"] = dict(t=20, b=20, l=10, r=10)
+        fig4.update_layout(**layout4)
+        st.plotly_chart(fig4, use_container_width=True)
+        st.caption("Each bar = clicks from one source article (prev) to its top linked destination (curr). Hover to see destination.")
 
 # ── Article trends (all months only) ─────────────────────────────────────────
 if is_all:
@@ -473,45 +525,60 @@ if is_all:
 
 # ── Outlier: Hyphen-Minus ─────────────────────────────────────────────────────
 st.markdown("---")
-st.markdown('<div class="section-title" id="outlier-hyphen-minus">⚠️ Outlier: Hyphen-Minus</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title" id="outlier-hyphen-minus">⚠️ Outliers: Excluded Articles</div>', unsafe_allow_html=True)
 
-with st.container():
-    st.markdown("""
-    <div class="outlier-box">
-        <b style="color:#fbbf24;">Why is this excluded from the main charts?</b><br>
-        <span style="color:#cbd5e1; font-size:0.87rem;">
-        The article <i>Hyphen-Minus</i> received an anomalously high number of clicks across all months,
-        widely attributed to a Wikipedia internal linking error that caused unintended redirects to this page.
-        Including it would compress all other articles into insignificance on every chart.
-        It is tracked here separately for transparency.
-        </span>
+st.markdown("""
+<div class="outlier-box">
+    <b style="color:#fbbf24;">Hyphen-Minus</b><br>
+    <span style="color:#cbd5e1; font-size:0.87rem;">
+    The article <i>Hyphen-Minus</i> received an anomalously high number of clicks across all months,
+    widely attributed to a Wikipedia internal linking error that caused unintended redirects to this page.
+    Including it would compress every other article into insignificance on every chart.
+    It is tracked below separately for transparency.
+    </span>
+</div>
+""", unsafe_allow_html=True)
+
+hm_display = hyphen_minus.copy()
+if not is_all:
+    hm_display = hm_display[hm_display["month"] == selected_month]
+
+col_hm1, col_hm2 = st.columns([1, 2], gap="medium")
+
+with col_hm1:
+    total_hm = hm_display["total_clicks"].sum()
+    st.markdown(f"""
+    <div class="metric-card" style="height:auto; padding:1.25rem; background:#1e1a0e; border-color:#854d0e;">
+        <div class="metric-value" style="color:#fbbf24;">{fmt_m(total_hm)}</div>
+        <div class="metric-label">{"Total clicks (all months)" if is_all else "Clicks this month"}</div>
     </div>
     """, unsafe_allow_html=True)
 
-    hm_display = hyphen_minus.copy()
-    if not is_all:
-        hm_display = hm_display[hm_display["month"] == selected_month]
+with col_hm2:
+    fig_hm = go.Figure(go.Bar(
+        x=hm_display["month_label"] if is_all else [MONTH_LABELS.get(selected_month, selected_month)],
+        y=hm_display["total_clicks"],
+        marker_color=CB_RED,
+        hovertemplate="<b>%{x}</b><br>%{y:,} clicks<extra></extra>",
+    ))
+    fig_hm.update_layout(**base_layout(height=200), margin=dict(t=10, b=40, l=10, r=10))
+    st.plotly_chart(fig_hm, use_container_width=True)
 
-    col_hm1, col_hm2 = st.columns([1, 2], gap="medium")
-
-    with col_hm1:
-        total_hm = hm_display["total_clicks"].sum()
-        st.markdown(f"""
-        <div class="metric-card" style="height:auto; padding:1.25rem;">
-            <div class="metric-value">{fmt_m(total_hm)}</div>
-            <div class="metric-label">{"Total clicks (all months)" if is_all else "Clicks this month"}</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with col_hm2:
-        fig_hm = go.Figure(go.Bar(
-            x=hm_display["month_label"] if is_all else [MONTH_LABELS.get(selected_month, selected_month)],
-            y=hm_display["total_clicks"],
-            marker_color=CB_RED,
-            hovertemplate="<b>%{x}</b><br>%{y:,} clicks<extra></extra>",
-        ))
-        fig_hm.update_layout(**base_layout(height=200), margin=dict(t=10, b=40, l=10, r=10))
-        st.plotly_chart(fig_hm, use_container_width=True)
+# ── Main_Page exclusion explanation ───────────────────────────────────────────
+st.markdown("""
+<div class="info-box">
+    <b style="color:#60a5fa;">Why is Main Page excluded?</b><br>
+    <span style="color:#cbd5e1; font-size:0.87rem;">
+    Wikipedia's <i>Main Page</i> is the default landing page of the entire site and receives a
+    disproportionate volume of traffic by design — it is the first page every new visitor sees,
+    and is linked from virtually every external source. Its click volume is so large that including
+    it as a <code>curr</code> destination would make every other article appear negligible.
+    Unlike Hyphen-Minus, this is not an error; it is simply not meaningful to compare editorial
+    articles against a navigation hub. It has therefore been excluded from all <code>curr</code>
+    counts across the entire dataset.
+    </span>
+</div>
+""", unsafe_allow_html=True)
 
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown("---")
