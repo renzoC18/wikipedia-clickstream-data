@@ -14,9 +14,8 @@ st.set_page_config(
 # ── Styling ───────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
-    html, body, [class*="css"] { font-family: 'IBM Plex Sans', sans-serif; }
-    h1, h2, h3 { font-family: 'Syne', sans-serif; }
+    html, body, [class*="css"] { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; }
+    h1, h2, h3 { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
     .block-container { padding-top: 1.5rem; padding-bottom: 2rem; max-width: 100%; }
 
     /* Force all Streamlit accent elements to blue */
@@ -61,9 +60,9 @@ st.markdown("""
         min-height: 80px;
     }
     .metric-value {
-        font-family: 'Syne', sans-serif;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
         font-size: 1.5rem;
-        font-weight: 800;
+        font-weight: 700;
         color: #60a5fa;
         word-break: break-word;
         overflow-wrap: break-word;
@@ -71,14 +70,15 @@ st.markdown("""
         line-height: 1.25;
     }
     .metric-label {
-        font-size: 0.7rem;
+        font-size: 0.72rem;
+        font-weight: 500;
         color: #94a3b8;
         text-transform: uppercase;
         letter-spacing: 0.07em;
         margin-top: 0.35rem;
     }
     .section-title {
-        font-family: 'Syne', sans-serif;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
         font-size: 1rem;
         font-weight: 700;
         color: #f1f5f9;
@@ -91,15 +91,31 @@ st.markdown("""
         background: #1e1a0e;
         border: 1px solid #854d0e;
         border-radius: 10px;
-        padding: 1rem 1.25rem;
+        padding: 1.25rem 1.5rem;
         margin-bottom: 1rem;
+        color: #e2e8f0;
+        font-size: 0.92rem;
+        font-weight: 400;
+        line-height: 1.65;
+    }
+    .outlier-box b {
+        font-size: 1rem;
+        font-weight: 600;
     }
     .info-box {
         background: #0f1e35;
         border: 1px solid #2a3f6f;
         border-radius: 10px;
-        padding: 1rem 1.25rem;
+        padding: 1.25rem 1.5rem;
         margin-top: 1rem;
+        color: #e2e8f0;
+        font-size: 0.92rem;
+        font-weight: 400;
+        line-height: 1.65;
+    }
+    .info-box b {
+        font-size: 1rem;
+        font-weight: 600;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -112,7 +128,7 @@ CB_TEAL   = "#009E73"
 CB_YELLOW = "#F0E442"
 CB_RED    = "#D55E00"
 CB_PINK   = "#CC79A7"
-CB_ORANGE = "#E69F00"   # kept only for Wong palette completeness, not used as primary
+CB_ORANGE = "#E69F00"
 
 CHART_COLORS = [CB_BLUE, CB_DBLUE, CB_TEAL, CB_YELLOW, CB_LBLUE, CB_RED, CB_PINK]
 
@@ -137,7 +153,7 @@ def base_layout(height=380):
     return dict(
         plot_bgcolor=PLOT_BG,
         paper_bgcolor=PAPER_BG,
-        font=dict(family="IBM Plex Sans", color=TEXT, size=11),
+        font=dict(family="Helvetica Neue, Helvetica, Arial, sans-serif", color=TEXT, size=11),
         xaxis=dict(gridcolor=GRID, showline=False, tickfont=dict(size=10), automargin=True),
         yaxis=dict(gridcolor=GRID, showline=False, tickfont=dict(size=10), automargin=True),
         height=height,
@@ -169,7 +185,7 @@ all_article_options = sorted(all_articles["curr"].unique().tolist())
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("""
-    <div style='font-family:Syne; font-size:1.15rem; font-weight:800;
+    <div style='font-family:"Helvetica Neue", Helvetica, Arial, sans-serif; font-size:1.15rem; font-weight:700;
                 color:#3b82f6; margin-bottom:0.25rem;'>
         📖 Wikipedia Clickstream
     </div>
@@ -280,17 +296,16 @@ else:
     )
 
 # ── Apply traffic type filter ─────────────────────────────────────────────────
-# top articles: filtered by which curr values appear in the relevant source
 if traffic_filter == "Internal links only":
     valid_curr = pairs_base["curr"].unique()
     articles   = articles_base[articles_base["curr"].isin(valid_curr)].copy()
-    searched   = pd.DataFrame(columns=searched_base.columns)   # not relevant
+    searched   = pd.DataFrame(columns=searched_base.columns)
     pairs      = pairs_base.copy()
 elif traffic_filter == "Search traffic only":
     valid_curr = searched_base["curr"].unique()
     articles   = articles_base[articles_base["curr"].isin(valid_curr)].copy()
     searched   = searched_base.copy()
-    pairs      = pd.DataFrame(columns=pairs_base.columns)      # not relevant
+    pairs      = pd.DataFrame(columns=pairs_base.columns)
 else:
     articles = articles_base.copy()
     searched = searched_base.copy()
@@ -315,11 +330,11 @@ if article_search.strip():
 # ── Header ────────────────────────────────────────────────────────────────────
 period_label = "Sep 2025 – Feb 2026" if is_all else MONTH_LABELS[selected_month]
 st.markdown(f"""
-<h1 style='font-family:Syne; font-size:1.9rem; margin-bottom:0; color:#f1f5f9;'>
+<h1 style='font-family:"Helvetica Neue", Helvetica, Arial, sans-serif; font-size:1.9rem; margin-bottom:0; color:#f1f5f9;'>
     Wikipedia Clickstream &nbsp;
     <span style='color:#3b82f6;'>{period_label}</span>
 </h1>
-<p style='color:#64748b; margin-top:0.2rem; font-size:0.82rem;'>
+<p style='color:#64748b; margin-top:0.2rem; font-size:0.82rem; font-weight:500;'>
     English Wikipedia reader navigation · Main_Page and Hyphen-Minus excluded from main analysis
 </p>
 """, unsafe_allow_html=True)
@@ -380,7 +395,7 @@ if is_all:
     fig_trend.update_layout(**base_layout(height=240), margin=dict(t=10, b=40, l=10, r=10))
     st.plotly_chart(fig_trend, use_container_width=True)
 
-# ── Row 1: Top articles + Traffic donut ───────────────────────────────────────
+# ── Row 1: Top articles (HORIZONTAL) + Traffic donut ─────────────────────────
 col_a, col_b = st.columns([3, 2], gap="medium")
 
 with col_a:
@@ -389,20 +404,32 @@ with col_a:
         st.info("No articles match the current filter selection.")
     else:
         df_art = articles.head(top_n).copy()
+        # Truncate label for display; full name available on hover
         df_art["label"] = df_art["curr"].str.replace("_", " ")
+        df_art["label_short"] = df_art["label"].str.slice(0, 30) + df_art["label"].apply(
+            lambda x: "…" if len(x) > 30 else ""
+        )
+        # Horizontal bar — sorted ascending so top article is at the top
+        df_art_sorted = df_art.sort_values("total_clicks", ascending=True)
         fig1 = go.Figure(go.Bar(
-            x=df_art["label"],
-            y=df_art["total_clicks"],
+            y=df_art_sorted["label_short"],
+            x=df_art_sorted["total_clicks"],
+            orientation="h",
             marker=dict(
-                color=df_art["total_clicks"],
+                color=df_art_sorted["total_clicks"],
                 colorscale=[[0, "#1a3a5c"], [1, CB_BLUE]],
                 showscale=False,
             ),
-            hovertemplate="<b>%{x}</b><br>%{y:,} clicks<extra></extra>",
+            customdata=df_art_sorted[["label"]],
+            hovertemplate="<b>%{customdata[0]}</b><br>%{x:,} clicks<extra></extra>",
         ))
-        layout1 = base_layout(380)
-        layout1["xaxis"]["tickangle"] = -40
-        fig1.update_layout(**layout1, margin=dict(t=20, b=80, l=10, r=10))
+        # Dynamic height: grow with number of bars, min 380
+        bar_height = max(380, top_n * 22)
+        layout1 = base_layout(bar_height)
+        layout1["yaxis"]["tickfont"] = dict(size=11)
+        layout1["xaxis"]["title"] = "Total clicks"
+        layout1["margin"] = dict(t=20, b=40, l=10, r=20)
+        fig1.update_layout(**layout1)
         st.plotly_chart(fig1, use_container_width=True)
 
 with col_b:
@@ -419,7 +446,7 @@ with col_b:
         hole=0.5,
         marker=dict(colors=CHART_COLORS),
         textinfo="percent+label",
-        textfont=dict(size=11, family="IBM Plex Sans"),
+        textfont=dict(size=11, family="Helvetica Neue, Helvetica, Arial, sans-serif"),
         hovertemplate="<b>%{label}</b><br>%{value:,} clicks · %{percent}<extra></extra>",
     ))
     fig2.update_layout(
@@ -442,19 +469,24 @@ with col_c:
     else:
         df_s = searched.head(top_n).copy()
         df_s["label"] = df_s["curr"].str.replace("_", " ")
+        df_s["label_short"] = df_s["label"].str.slice(0, 30) + df_s["label"].apply(
+            lambda x: "…" if len(x) > 30 else ""
+        )
         fig3 = go.Figure(go.Bar(
-            x=df_s["label"],
+            x=df_s["label_short"],
             y=df_s["total_clicks"],
             marker=dict(
                 color=df_s["total_clicks"],
                 colorscale=[[0, "#1a3a5c"], [1, CB_DBLUE]],
                 showscale=False,
             ),
-            hovertemplate="<b>%{x}</b><br>%{y:,} clicks<extra></extra>",
+            customdata=df_s[["label"]],
+            hovertemplate="<b>%{customdata[0]}</b><br>%{y:,} clicks<extra></extra>",
         ))
         layout3 = base_layout(380)
-        layout3["xaxis"]["tickangle"] = -40
-        fig3.update_layout(**layout3, margin=dict(t=20, b=80, l=10, r=10))
+        layout3["xaxis"]["tickangle"] = -35
+        layout3["xaxis"]["tickfont"] = dict(size=10)
+        fig3.update_layout(**layout3, margin=dict(t=20, b=100, l=10, r=10))
         st.plotly_chart(fig3, use_container_width=True)
 
 with col_d:
@@ -465,8 +497,11 @@ with col_d:
         df_p = pairs.head(top_n).copy()
         df_p["prev_label"] = df_p["prev"].str.replace("_", " ")
         df_p["curr_label"] = df_p["curr"].str.replace("_", " ")
+        df_p["prev_short"] = df_p["prev_label"].str.slice(0, 28) + df_p["prev_label"].apply(
+            lambda x: "…" if len(x) > 28 else ""
+        )
         fig4 = go.Figure(go.Bar(
-            y=df_p["prev_label"],
+            y=df_p["prev_short"],
             x=df_p["total_clicks"],
             orientation="h",
             marker=dict(
@@ -530,12 +565,10 @@ st.markdown('<div class="section-title" id="outlier-hyphen-minus">⚠️ Outlier
 st.markdown("""
 <div class="outlier-box">
     <b style="color:#fbbf24;">Hyphen-Minus</b><br>
-    <span style="color:#cbd5e1; font-size:0.87rem;">
     The article <i>Hyphen-Minus</i> received an anomalously high number of clicks across all months,
     widely attributed to a Wikipedia internal linking error that caused unintended redirects to this page.
     Including it would compress every other article into insignificance on every chart.
     It is tracked below separately for transparency.
-    </span>
 </div>
 """, unsafe_allow_html=True)
 
@@ -568,7 +601,6 @@ with col_hm2:
 st.markdown("""
 <div class="info-box">
     <b style="color:#60a5fa;">Why is Main Page excluded?</b><br>
-    <span style="color:#cbd5e1; font-size:0.87rem;">
     Wikipedia's <i>Main Page</i> is the default landing page of the entire site and receives a
     disproportionate volume of traffic by design — it is the first page every new visitor sees,
     and is linked from virtually every external source. Its click volume is so large that including
@@ -576,14 +608,13 @@ st.markdown("""
     Unlike Hyphen-Minus, this is not an error; it is simply not meaningful to compare editorial
     articles against a navigation hub. It has therefore been excluded from all <code>curr</code>
     counts across the entire dataset.
-    </span>
 </div>
 """, unsafe_allow_html=True)
 
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown("---")
 st.markdown("""
-<p style='color:#475569; font-size:0.75rem; text-align:center;'>
+<p style='color:#475569; font-size:0.75rem; text-align:center; font-weight:500;'>
     Data: Wikimedia Foundation · English Wikipedia Clickstream Sep 2025 – Feb 2026 &nbsp;|&nbsp;
     Processed with DuckDB &nbsp;|&nbsp; Visualised with Streamlit + Plotly
 </p>
