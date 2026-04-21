@@ -14,31 +14,13 @@ st.set_page_config(
 # ── Styling ───────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-    html, body, [class*="css"] { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; }
+    html, body, [class*="css"] {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-weight: 400;
+        font-size: 16px;
+    }
     h1, h2, h3 { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
     .block-container { padding-top: 1.5rem; padding-bottom: 2rem; max-width: 100%; }
-
-    /* Force all Streamlit accent elements to blue */
-    :root {
-        --primary-color: #3b82f6 !important;
-    }
-    .stSlider [data-baseweb="slider"] [role="slider"] {
-        background-color: #3b82f6 !important;
-        border-color: #3b82f6 !important;
-    }
-    .stSlider [data-baseweb="slider"] [data-testid="stThumbValue"] {
-        color: #3b82f6 !important;
-    }
-    div[data-baseweb="slider"] > div > div > div {
-        background: #3b82f6 !important;
-    }
-    .stMultiSelect [data-baseweb="tag"] {
-        background-color: #1d4ed8 !important;
-    }
-    .stSelectbox [aria-selected="true"] {
-        color: #3b82f6 !important;
-    }
-    a { color: #60a5fa !important; }
 
     /* KPI cards */
     .kpi-row {
@@ -51,70 +33,70 @@ st.markdown("""
         background: #1a2744;
         border: 1px solid #2a3f6f;
         border-radius: 12px;
-        padding: 1rem 0.75rem;
+        padding: 1.25rem 1rem;
         text-align: center;
         flex: 1;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        min-height: 80px;
+        min-height: 100px;
     }
     .metric-value {
         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        font-size: 1.5rem;
+        font-size: 2rem;
         font-weight: 700;
         color: #60a5fa;
         word-break: break-word;
         overflow-wrap: break-word;
         hyphens: auto;
-        line-height: 1.25;
+        line-height: 1.2;
     }
     .metric-label {
-        font-size: 0.72rem;
+        font-size: 0.82rem;
         font-weight: 500;
         color: #94a3b8;
         text-transform: uppercase;
         letter-spacing: 0.07em;
-        margin-top: 0.35rem;
+        margin-top: 0.4rem;
     }
     .section-title {
         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        font-size: 1rem;
+        font-size: 1.2rem;
         font-weight: 700;
         color: #f1f5f9;
         border-left: 3px solid #3b82f6;
         padding-left: 0.75rem;
-        margin-bottom: 0.4rem;
-        margin-top: 0.2rem;
+        margin-bottom: 0.5rem;
+        margin-top: 0.25rem;
     }
     .outlier-box {
         background: #1e1a0e;
         border: 1px solid #854d0e;
         border-radius: 10px;
-        padding: 1.25rem 1.5rem;
+        padding: 1.5rem 1.75rem;
         margin-bottom: 1rem;
         color: #e2e8f0;
-        font-size: 0.92rem;
+        font-size: 1rem;
         font-weight: 400;
-        line-height: 1.65;
+        line-height: 1.7;
     }
     .outlier-box b {
-        font-size: 1rem;
+        font-size: 1.1rem;
         font-weight: 600;
     }
     .info-box {
         background: #0f1e35;
         border: 1px solid #2a3f6f;
         border-radius: 10px;
-        padding: 1.25rem 1.5rem;
+        padding: 1.5rem 1.75rem;
         margin-top: 1rem;
         color: #e2e8f0;
-        font-size: 0.92rem;
+        font-size: 1rem;
         font-weight: 400;
-        line-height: 1.65;
+        line-height: 1.7;
     }
     .info-box b {
-        font-size: 1rem;
+        font-size: 1.1rem;
         font-weight: 600;
     }
 </style>
@@ -153,9 +135,9 @@ def base_layout(height=380):
     return dict(
         plot_bgcolor=PLOT_BG,
         paper_bgcolor=PAPER_BG,
-        font=dict(family="Helvetica Neue, Helvetica, Arial, sans-serif", color=TEXT, size=11),
-        xaxis=dict(gridcolor=GRID, showline=False, tickfont=dict(size=10), automargin=True),
-        yaxis=dict(gridcolor=GRID, showline=False, tickfont=dict(size=10), automargin=True),
+        font=dict(family="Helvetica Neue, Helvetica, Arial, sans-serif", color=TEXT, size=13),
+        xaxis=dict(gridcolor=GRID, showline=False, tickfont=dict(size=12), automargin=True),
+        yaxis=dict(gridcolor=GRID, showline=False, tickfont=dict(size=12), automargin=True),
         height=height,
     )
 
@@ -185,7 +167,7 @@ all_article_options = sorted(all_articles["curr"].unique().tolist())
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("""
-    <div style='font-family:"Helvetica Neue", Helvetica, Arial, sans-serif; font-size:1.15rem; font-weight:700;
+    <div style='font-family:"Helvetica Neue", Helvetica, Arial, sans-serif; font-size:1.3rem; font-weight:700;
                 color:#3b82f6; margin-bottom:0.25rem;'>
         📖 Wikipedia Clickstream
     </div>
@@ -330,11 +312,11 @@ if article_search.strip():
 # ── Header ────────────────────────────────────────────────────────────────────
 period_label = "Sep 2025 – Feb 2026" if is_all else MONTH_LABELS[selected_month]
 st.markdown(f"""
-<h1 style='font-family:"Helvetica Neue", Helvetica, Arial, sans-serif; font-size:1.9rem; margin-bottom:0; color:#f1f5f9;'>
+<h1 style='font-family:"Helvetica Neue", Helvetica, Arial, sans-serif; font-size:2.4rem; font-weight:800; margin-bottom:0; color:#f1f5f9;'>
     Wikipedia Clickstream &nbsp;
     <span style='color:#3b82f6;'>{period_label}</span>
 </h1>
-<p style='color:#64748b; margin-top:0.2rem; font-size:0.82rem; font-weight:500;'>
+<p style='color:#64748b; margin-top:0.3rem; font-size:0.95rem; font-weight:500;'>
     English Wikipedia reader navigation · Main_Page and Hyphen-Minus excluded from main analysis
 </p>
 """, unsafe_allow_html=True)
@@ -426,7 +408,7 @@ with col_a:
         # Dynamic height: grow with number of bars, min 380
         bar_height = max(380, top_n * 22)
         layout1 = base_layout(bar_height)
-        layout1["yaxis"]["tickfont"] = dict(size=11)
+        layout1["yaxis"]["tickfont"] = dict(size=12)
         layout1["xaxis"]["title"] = "Total clicks"
         layout1["margin"] = dict(t=20, b=40, l=10, r=20)
         fig1.update_layout(**layout1)
@@ -446,7 +428,7 @@ with col_b:
         hole=0.5,
         marker=dict(colors=CHART_COLORS),
         textinfo="percent+label",
-        textfont=dict(size=11, family="Helvetica Neue, Helvetica, Arial, sans-serif"),
+        textfont=dict(size=13, family="Helvetica Neue, Helvetica, Arial, sans-serif"),
         hovertemplate="<b>%{label}</b><br>%{value:,} clicks · %{percent}<extra></extra>",
     ))
     fig2.update_layout(
@@ -455,7 +437,7 @@ with col_b:
         margin=dict(t=20, b=20, l=10, r=10),
         height=380,
         showlegend=True,
-        legend=dict(font=dict(color=TEXT, size=11), bgcolor="rgba(0,0,0,0)"),
+        legend=dict(font=dict(color=TEXT, size=13), bgcolor="rgba(0,0,0,0)"),
     )
     st.plotly_chart(fig2, use_container_width=True)
 
@@ -485,7 +467,7 @@ with col_c:
         ))
         layout3 = base_layout(380)
         layout3["xaxis"]["tickangle"] = -35
-        layout3["xaxis"]["tickfont"] = dict(size=10)
+        layout3["xaxis"]["tickfont"] = dict(size=12)
         fig3.update_layout(**layout3, margin=dict(t=20, b=100, l=10, r=10))
         st.plotly_chart(fig3, use_container_width=True)
 
@@ -550,7 +532,7 @@ if is_all:
         fig5.update_traces(line=dict(width=2.5), marker=dict(size=7))
         fig5.update_layout(
             **base_layout(height=360),
-            legend=dict(font=dict(color=TEXT, size=11), bgcolor="rgba(0,0,0,0)"),
+            legend=dict(font=dict(color=TEXT, size=13), bgcolor="rgba(0,0,0,0)"),
             xaxis_title="", yaxis_title="Clicks",
             margin=dict(t=20, b=40, l=10, r=10),
         )
@@ -591,7 +573,7 @@ with col_hm2:
     fig_hm = go.Figure(go.Bar(
         x=hm_display["month_label"] if is_all else [MONTH_LABELS.get(selected_month, selected_month)],
         y=hm_display["total_clicks"],
-        marker_color=CB_RED,
+        marker_color="#fbbf24",
         hovertemplate="<b>%{x}</b><br>%{y:,} clicks<extra></extra>",
     ))
     fig_hm.update_layout(**base_layout(height=200), margin=dict(t=10, b=40, l=10, r=10))
@@ -614,7 +596,7 @@ st.markdown("""
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown("---")
 st.markdown("""
-<p style='color:#475569; font-size:0.75rem; text-align:center; font-weight:500;'>
+<p style='color:#475569; font-size:0.85rem; text-align:center; font-weight:500;'>
     Data: Wikimedia Foundation · English Wikipedia Clickstream Sep 2025 – Feb 2026 &nbsp;|&nbsp;
     Processed with DuckDB &nbsp;|&nbsp; Visualised with Streamlit + Plotly
 </p>
